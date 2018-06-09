@@ -1,0 +1,15 @@
+# Ignore all
+*
+# Unignore all with extensions
+!*.*
+# Unignore all dirs
+!/**/
+# haskell compiled files
+*.o
+*.hi
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr

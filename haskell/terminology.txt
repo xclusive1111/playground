@@ -1,0 +1,7 @@
+-> Algebraic data type, is a type where we specify the shape of each the elements,
+   which is created by "algebraic" operation: "sum" and 'product'
+-> Sum type, is alternation, e.g: data Animal = Cat | Dog (meaning Animal is Cat or Dog but not both)
+-> Product type, is combination, e.g: data Farm = Farm Animal Int (meaning a Farm has "Int" amounts of Animal)
+-> cartesian product, is the process of creating a big set out of smaller sets, e.g: [[1], [2], [3]] results in [1,2,3]
+-> as pattern, e.g: list @ (x:xs)
+
