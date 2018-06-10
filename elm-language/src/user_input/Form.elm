@@ -5,6 +5,7 @@ import Html.Attributes exposing (placeholder, style, type_)
 import Html.Events exposing (onClick, onInput)
 
 
+main : Program Never Model Action
 main =
     Html.beginnerProgram { model = model, view = view, update = update }
 
@@ -22,12 +23,12 @@ model = Model "" "" ""
 
 -- Update
 
-type Msg = Name String
+type Action = Name String
          | Password String
          | RePassword String
 
 
-update : Msg -> Model -> Model
+update : Action -> Model -> Model
 update msg model = case msg of
         Name name -> { model | name = name }
         Password pwd -> { model | password = pwd }
@@ -37,7 +38,7 @@ update msg model = case msg of
 
 -- View
 
-view : Model -> Html Msg
+view : Model -> Html Action
 view model =
     div []
         [ input [ type_ "text", placeholder "Name", onInput Name ] []

@@ -40,7 +40,7 @@ model =
 -- Update
 
 
-type Msg
+type Action
     = SetUserName String
     | SetEmail String
     | SetPassword String
@@ -48,7 +48,7 @@ type Msg
     | Submit
 
 
-update : Msg -> Model -> Model
+update : Action -> Model -> Model
 update msg model =
     case msg of
         SetUserName uname ->
@@ -86,7 +86,7 @@ modelValidator =
         ]
 
 
-viewFormErrors : FormField -> List Error -> Html Msg
+viewFormErrors : FormField -> List Error -> Html Action
 viewFormErrors field errors =
     errors
         |> List.filter (\( fieldError, _ ) -> fieldError == field)
@@ -99,7 +99,7 @@ viewFormErrors field errors =
 -- View
 
 
-viewForm : Model -> Html Msg
+viewForm : Model -> Html Action
 viewForm model =
     form [ onSubmit Submit, class "ui form" ]
         [ table []

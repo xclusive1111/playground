@@ -11,7 +11,7 @@ type alias Model =
     {}
 
 
-init : ( Model, Cmd Msg )
+init : ( Model, Cmd Action )
 init =
     ( {}, Cmd.none )
 
@@ -20,11 +20,11 @@ init =
 ---- UPDATE ----
 
 
-type Msg
-    = NoOp
+type Action
+    = MorePlease
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Action -> Model -> ( Model, Cmd Action )
 update msg model =
     ( model, Cmd.none )
 
@@ -33,7 +33,7 @@ update msg model =
 ---- VIEW ----
 
 
-view : Model -> Html Msg
+view : Model -> Html Action
 view model =
     div []
         [ img [ src "/logo.svg" ] []
@@ -45,7 +45,7 @@ view model =
 ---- PROGRAM ----
 
 
-main : Program Never Model Msg
+main : Program Never Model Action
 main =
     Html.program
         { view = view

@@ -5,6 +5,7 @@ import Html.Attributes exposing (placeholder)
 import Html.Events exposing (onClick, onInput)
 
 
+main : Program Never Model Action
 main =
     Html.beginnerProgram { model = model, view = view, update = update }
 
@@ -24,16 +25,16 @@ model =
 
 -- Update
 
-type Msg = Change String
+type Action = Change String
 
-update : Msg -> Model -> Model
+update : Action -> Model -> Model
 update msg model =
     case msg of
         Change newContent -> { model | content = newContent }
 
 -- View
 
-view : Model -> Html Msg
+view : Model -> Html Action
 view model =
     div []
         [ input [ placeholder "Text to reverse", onInput Change ] []

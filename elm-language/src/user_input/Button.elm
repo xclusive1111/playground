@@ -4,6 +4,7 @@ import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
 
 
+main : Program Never Model Action
 main =
     Html.beginnerProgram { model = model, view = view, update = update }
 
@@ -21,12 +22,12 @@ model =
 -- Update
 
 
-type Msg
+type Action
     = Inc
     | Dec
 
 
-update : Msg -> Model -> Model
+update : Action -> Model -> Model
 update msg model =
     case msg of
         Inc ->
@@ -36,7 +37,7 @@ update msg model =
             model - 1
 
 
-view : Model -> Html Msg
+view : Model -> Html Action
 view model =
     div []
         [ button [ onClick Dec ] [ text "-" ]
