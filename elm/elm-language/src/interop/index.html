@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Elm Port</title>
+</head>
+<body>
+  <div id="spelling"></div>
+  <script src="spelling.js" charset="utf-8"></script>
+  <script type="text/javascript">
+     const app = Elm.Spelling.fullscreen();
+     app.ports.check.subscribe((word) => {
+       const suggestions = spellCheck(word);
+       app.ports.suggestions.send(suggestions);
+     })
+
+     const fruits = [];
+     const spellCheck = (word) => {
+       fruits.push(word);
+       return fruits;
+     }
+  </script>
+
+</body>
+</html>
