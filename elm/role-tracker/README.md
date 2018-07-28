@@ -1,10 +1,11 @@
-Sample app to desmonstrate routing, ajax, modules, etc..
+Sample app to demonstrate routing, Ajax, modules, etc..
 
 
 ## Start fake API server
 
 
 ```sh
+cd fake-server
 node api.js
 ```
 

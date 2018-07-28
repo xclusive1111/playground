@@ -2,6 +2,7 @@ module Players.Edit exposing (..)
 
 import Html exposing (Html, a, button, div, i, span, text)
 import Html.Attributes exposing (class, href)
+import Html.Events exposing (onClick)
 import Models exposing (Player)
 import Msgs exposing (Msg)
 import Routing exposing (playersPath)
@@ -32,11 +33,17 @@ form player =
 
 btnLevelDecrease : Player -> Html Msg
 btnLevelDecrease player =
-  button [ class "icon-minus" ] [ text "-" ]
+  let
+      message = Msgs.ChangeLevel player -1
+  in
+      button [ class "icon-minus", onClick message ] [ text "-" ]
 
 btnLevelIncrease : Player -> Html Msg
 btnLevelIncrease player =
-  button [ class "icon-plus" ] [ text "+" ]
+  let
+      message = Msgs.ChangeLevel player 1
+  in
+      button [ class "icon-plus", onClick message ] [ text "+" ]
 
 listBtn : Html Msg
 listBtn =
