@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CSS Flex box</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .container {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: space-around;
+    }
+
+    .item {
+      width: 150px;
+      height: 50px;
+    }
+
+    .small.item {
+      width: 70px;
+      height: 30px;
+    }
+
+    .round {
+      border: solid 1px grey;
+      border-radius: 5px;
+    }
+
+    .tomato {
+      background: tomato;
+    }
+
+    .skyblue {
+      background: deepskyblue;
+    }
+
+    .divider {
+      margin-top: 5px;
+      margin-bottom: 5px;
+      height: 2px;
+      border: 1px solid grey;
+    }
+
+    .navigation {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: flex-end;
+    }
+    
+    .navigation a {
+      text-decoration: none;
+      text-align: center; 
+      display: block;
+      color: white;
+      padding-top: 5px;
+    }
+
+    .navigation > .item:hover {
+      background: #11ace0;
+    }
+    
+    /* Medium screens */
+    @media all and (max-width: 900px) {
+      .navigation {
+        justify-content: space-around;
+      }
+    }
+
+    /* Small screens */
+    @media all and (max-width: 600px) {
+      .navigation > .item {
+        flex: 1 100%;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="round tomato item">1</div>
+    <div class="round tomato item">2</div>
+    <div class="round tomato item">3</div>
+    <div class="round tomato item">4</div>
+    <div class="round tomato item">5</div>
+    <div class="round tomato item">6</div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="navigation">
+    <div class="small skyblue item"><a href="#">Home</a></div>
+    <div class="small skyblue item"><a href="#">About</a></div>
+    <div class="small skyblue item"><a href="#">Products</a></div>
+    <div class="small skyblue item"><a href="#">Contact</a></div>
+  </div>
+</body>
+</html>
