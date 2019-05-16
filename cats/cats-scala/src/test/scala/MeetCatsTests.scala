@@ -1,3 +1,4 @@
+import Types.Cat
 import cats.Show
 import org.scalatest.FunSuite
 
@@ -29,6 +30,16 @@ class MeetCatsTests extends FunSuite {
     assert(1 =!= 2 )
     assert(eqInt.eqv(123, 123))
     // 1 =!= "1" => won't compile
+  }
+
+  test("exercise Eq Cat") {
+    import EqExercise._
+    val cat1 = Cat("Garfield", 38, "orange and black")
+    val cat2 = Cat("Heathcliff", 33, "orange and black")
+    val optCat1 = Option(cat1)
+    val optCat2 = Option.empty[Cat]
+    assert(! isTwoCatsEqual(cat1, cat2))
+    assert(! isTwoOptionCatsEqual(optCat1, optCat2))
   }
 
 }

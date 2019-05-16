@@ -1,9 +1,4 @@
-sealed trait Json
-final case class JsonObject(get: Map[String, Json]) extends Json
-final case class JsonString(get: String) extends Json
-final case class JsonInt(get: Int) extends Json
-final case class JsonArray(get: Seq[Json]) extends Json
-case object JsonNull extends Json
+import Types._
 
 /**
   * A `type class` is an interface or API that represents some functionality we want to implement
@@ -13,7 +8,6 @@ trait JsonWriter[A] {
   def write(value: A): Json
 }
 
-final case class Person(name: String, email: String)
 
 /**
   * `Type class instance` is an implementation of a type class.
@@ -97,7 +91,6 @@ object JsonWriterSyntax {
 /**
   * Exercise: Printable library */
 
-final case class Cat(name: String, age: Int, color: String)
 
 trait Printable[A] {
   def format(value: A): String

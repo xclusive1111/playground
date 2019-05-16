@@ -1,4 +1,5 @@
 import org.scalatest.FunSuite
+import Types._
 
 class TypeClassTests extends FunSuite {
 
