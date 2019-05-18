@@ -8,5 +8,5 @@ object Types {
 
   final case class Person(name: String, email: String)
   final case class Cat(name: String, age: Int, color: String)
-
+  final case class Order(totalCost: Double, quantity: Double)
 }
