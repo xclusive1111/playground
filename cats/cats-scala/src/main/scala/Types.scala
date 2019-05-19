@@ -9,4 +9,10 @@ object Types {
   final case class Person(name: String, email: String)
   final case class Cat(name: String, age: Int, color: String)
   final case class Order(totalCost: Double, quantity: Double)
+
+  final case class Box[A](value: A)
+
+  sealed trait Tree[+A]
+  final case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
+  final case class Leaf[A](Value: A) extends Tree[A]
 }

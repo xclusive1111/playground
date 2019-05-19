@@ -92,19 +92,32 @@ object JsonWriterSyntax {
   * Exercise: Printable library */
 
 
-trait Printable[A] {
+trait Printable[A] { self =>
   def format(value: A): String
+
+  /**
+    * Exercise: Showing off with contramap
+    * Contramap prepend an operation to a chain
+    * */
+  def contramap[B](f: B => A): Printable[B] = new Printable[B] {
+    override def format(value: B): String = self.format(f(value))
+  }
 }
 
 object PrintableInstances {
   implicit val printInt: Printable[Int] = n => n.toString
-  implicit val printString: Printable[String] = value => value
+  implicit val printString: Printable[String] = value => "\"" + value + "\""
+  implicit val printBool: Printable[Boolean] = value => if (value) "yes" else "no"
   implicit val printCat: Printable[Cat] = new Printable[Cat] {
     override def format(value: Cat): String = {
       val ps = implicitly[Printable[String]]
       val pi = implicitly[Printable[Int]]
       s"${ps.format(value.name)} is a ${pi.format(value.age)} year-old ${ps.format(value.color)} cat"
     }
+  }
+
+  implicit def printBox[A](implicit p: Printable[A]): Printable[Box[A]] = new Printable[Box[A]] {
+    override def format(box: Box[A]): String = p.format(box.value)
   }
 }
 
@@ -124,3 +137,47 @@ object PrintableSyntax {
   }
 }
 
+/**
+  * Invariant functor and the `imap` method */
+trait Codec[A] { self =>
+  def encode(value: A): String
+  def decode(value: String): A
+
+  /**
+    * `imap` is informally equivalent to a combination of `map` and `contramap` */
+  def imap[B](dec: A => B, enc: B => A): Codec[B] = new Codec[B] {
+
+    // contramap: prepend an operation to a chain
+    override def encode(value: B): String = self.encode(enc(value))
+
+    // map: append an operation to a chain
+    override def decode(value: String): B = dec(self.decode(value))
+  }
+}
+
+object Codec {
+  def encode[A](value: A)(implicit c: Codec[A]): String = c.encode(value)
+  def decode[A](value: String)(implicit c: Codec[A]): A = c.decode(value)
+}
+
+object CodecInstances {
+  implicit val stringCodec: Codec[String] = new Codec[String] {
+    override def encode(value: String): String = value
+
+    override def decode(value: String): String = value
+  }
+
+  // We can construct many useful codecs for other types by building off
+  // of `stringCodec` using `imap`
+  implicit val intCodec: Codec[Int] =
+    stringCodec.imap(_.toInt, _.toString)
+
+  implicit val boolCodec: Codec[Boolean] =
+    stringCodec.imap(_.toBoolean, _.toString)
+
+  implicit val doubleCodec: Codec[Double] =
+    stringCodec.imap(_.toDouble, _.toString)
+
+  implicit def boxCodec[A](implicit c: Codec[A]): Codec[Box[A]] =
+    stringCodec.imap(str => Box(c.decode(str)), box => c.encode(box.value))
+}
