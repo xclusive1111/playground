@@ -106,7 +106,7 @@ trait Printable[A] { self =>
 
 object PrintableInstances {
   implicit val printInt: Printable[Int] = n => n.toString
-  implicit val printString: Printable[String] = value => "\"" + value + "\""
+  implicit val printString: Printable[String] = value => value
   implicit val printBool: Printable[Boolean] = value => if (value) "yes" else "no"
   implicit val printCat: Printable[Cat] = new Printable[Cat] {
     override def format(value: Cat): String = {
@@ -117,8 +117,12 @@ object PrintableInstances {
   }
 
   implicit def printBox[A](implicit p: Printable[A]): Printable[Box[A]] = new Printable[Box[A]] {
-    override def format(box: Box[A]): String = p.format(box.value)
+    override def format(box: Box[A]): String = box match {
+      case FullBox(value) => p.format(value)
+      case EmptyBox => ""
+    }
   }
+
 }
 
 /**
@@ -138,7 +142,9 @@ object PrintableSyntax {
 }
 
 /**
-  * Invariant functor and the `imap` method */
+  * Invariant functor and the `imap` method
+  * Invariant functor represents bidirectional transformations
+  * */
 trait Codec[A] { self =>
   def encode(value: A): String
   def decode(value: String): A
@@ -179,5 +185,14 @@ object CodecInstances {
     stringCodec.imap(_.toDouble, _.toString)
 
   implicit def boxCodec[A](implicit c: Codec[A]): Codec[Box[A]] =
-    stringCodec.imap(str => Box(c.decode(str)), box => c.encode(box.value))
+    stringCodec.imap(str => FullBox(c.decode(str)), {
+      case FullBox(value) => c.encode(value)
+      case EmptyBox => ""
+    })
+
+  implicit def optionCodec[A](implicit c: Codec[A]): Codec[Option[A]] =
+      stringCodec.imap(str => Option(c.decode(str)), {
+        case Some(value) => c.encode(value)
+        case None => ""
+      })
 }

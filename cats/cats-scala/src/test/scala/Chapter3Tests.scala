@@ -1,4 +1,4 @@
-import Types.{Box, Branch, Leaf, Tree}
+import Types._
 import org.scalatest.FunSuite
 import Chapter3.MyFunctorInstances._
 import Chapter3.Example._
@@ -15,6 +15,14 @@ class Chapter3Tests extends FunSuite {
 
     val x = MyFunctor[Option].fmap(Some(1))(toDoubleAndPlus2)
     assert(x === Some(2.0))
+
+    def map[F[_], A, B](fa: F[A])(f: A => B)(implicit functor: MyFunctor[F]): F[B] =
+      fa.fmap(f)
+
+    assert(map(Option(1))(toDoubleAndPlus2) === Some(2.0))
+    assert(map(List(1, 2, 3))(toDoubleAndPlus2) === List(2.0, 4.0, 6.0))
+    assert(map(Seq(1, 2, 3))(toDoubleAndPlus2) === Seq(2.0, 4.0, 6.0))
+
   }
 
   test("mapping over a binary tree") {
@@ -32,7 +40,7 @@ class Chapter3Tests extends FunSuite {
     import PrintableInstances._
     import Printable._
     assert(format(1) === "1")
-    assert(format("1") === "\"1\"")
+    assert(format("1") === "1")
     assert(format(true) === "yes")
     assert(format(Box(true)) === "yes")
   }

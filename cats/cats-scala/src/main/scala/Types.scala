@@ -10,7 +10,12 @@ object Types {
   final case class Cat(name: String, age: Int, color: String)
   final case class Order(totalCost: Double, quantity: Double)
 
-  final case class Box[A](value: A)
+  sealed trait Box[+A]
+  final case class FullBox[+A](value: A) extends Box[A]
+  final case object EmptyBox extends Box[Nothing]
+  final case object Box {
+    def apply[A](value: A): Box[A] = if (value == null) EmptyBox else FullBox(value)
+  }
 
   sealed trait Tree[+A]
   final case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]

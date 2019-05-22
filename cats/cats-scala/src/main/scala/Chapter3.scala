@@ -1,4 +1,4 @@
-import Types.{Box, Branch, Leaf, Tree}
+import Types._
 import cats.Functor
 import cats.instances.function._
 import cats.instances.list._
@@ -36,9 +36,29 @@ object Chapter3 {
     def fmap[A, B](fa: F[A])(f: A => B): F[B]
   }
 
+  /**
+    * Define interface using implicit object
+    */
   object MyFunctor {
     def apply[F[_]](implicit functor: MyFunctor[F]): MyFunctor[F] = functor
     def fmap[F[_], A, B](fa: F[A])(f: A => B)(implicit functor: MyFunctor[F]): F[B] = functor.fmap(fa)(f)
+  }
+
+  /**
+    * Define interface using extension methods
+    */
+  object MyFunctorSyntax {
+    implicit class MyFunctorOps[F[_]: MyFunctor, A](fa: F[A]) {
+      def fmap[B](fab: A => B): F[B] = MyFunctor[F].fmap(fa)(fab)
+    }
+  }
+
+  /**
+    * Define interface using extension methods */
+  object MyFunctorSyntax2 {
+    implicit class MyFunctorOps[F[_], A](source: F[A]) {
+      def fmap[B](f: A => B)(implicit functor: MyFunctor[F]): F[B] = functor.fmap(source)(f)
+    }
   }
 
   /**
@@ -46,7 +66,8 @@ object Chapter3 {
   object MyFunctorInstances {
     implicit val boxFunctor: MyFunctor[Box] = new MyFunctor[Box] {
       override def fmap[A, B](fa: Box[A])(f: A => B): Box[B] = fa match {
-        case Box(value) => Box(f(value))
+        case FullBox(value) => FullBox(f(value))
+        case EmptyBox => EmptyBox
       }
     }
 
@@ -58,6 +79,10 @@ object Chapter3 {
       override def fmap[A, B](fa: List[A])(f: A => B): List[B] = fa.map(f)
     }
 
+    implicit val seqFunctor: MyFunctor[Seq] = new MyFunctor[Seq] {
+      override def fmap[A, B](fa: Seq[A])(f: A => B): Seq[B] = fa.map(f)
+    }
+
     implicit def futureFunctor(implicit ex: ExecutionContext): MyFunctor[Future] = new MyFunctor[Future] {
       override def fmap[A, B](fa: Future[A])(f: A => B): Future[B] = fa.map(f)
     }
@@ -67,14 +92,6 @@ object Chapter3 {
         case Branch(left, right) => Branch(fmap(left)(f), fmap(right)(f))
         case Leaf(value)         => Leaf(f(value))
       }
-    }
-  }
-
-  /**
-    * Define interface */
-  object MyFunctorSyntax {
-    implicit class MyFunctorOps[F[_], A](source: F[A]) {
-      def fmap[B](f: A => B)(implicit functor: MyFunctor[F]): F[B] = functor.fmap(source)(f)
     }
   }
 
