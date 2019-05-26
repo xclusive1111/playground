@@ -1,5 +1,7 @@
 import Chapter3.MyFunctor
-import Types.{Box, FullBox, EmptyBox}
+import Types.{Box, EmptyBox, FullBox, Id}
+
+import scala.util.{Success, Try}
 
 object Chapter4 {
 
@@ -23,8 +25,6 @@ object Chapter4 {
 
     override def fmap[A, B](fa: F[A])(f: A => B): F[B] =
       flatMap(fa)(a => pure(f(a)))
-
-    def empty[A]: F[A]
   }
 
   /**
@@ -35,7 +35,6 @@ object Chapter4 {
     def pure[F[_], A](value: A)(implicit m: MyMonad[F]): F[A] = m.pure(value)
     def flatMap[F[_], A, B](fa: F[A])(f: A => F[B])(implicit m: MyMonad[F]): F[B] = m.flatMap(fa)(f)
     def map[F[_], A, B](fa: F[A])(f: A => B)(implicit m: MyMonad[F]): F[B] = m.fmap(fa)(f)
-    def empty[F[_], A](implicit m: MyMonad[F]): F[A] = m.empty
   }
 
   /**
@@ -43,7 +42,8 @@ object Chapter4 {
     */
   object MyMonadSyntax {
     implicit class MyMonadOps[F[_], A](fa: F[A]) {
-      def bind[B](fab: A => F[B])(implicit M: MyMonad[F]): F[B] = M.flatMap(fa)(fab)
+      def flatMap[B](fab: A => F[B])(implicit M: MyMonad[F]): F[B] = M.flatMap(fa)(fab)
+      def map[B](fab: A => B)(implicit M: MyMonad[F]): F[B] = M.fmap(fa)(fab)
     }
 
     implicit class Ops[F[_]: MyMonad, A](value: A) {
@@ -56,16 +56,12 @@ object Chapter4 {
       override def pure[A](value: A): Option[A] = Option(value)
 
       override def flatMap[A, B](fa: Option[A])(f: A => Option[B]): Option[B] = fa.flatMap(f)
-
-      override def empty[A]: Option[A] = None
     }
 
     implicit val listMonad: MyMonad[List] = new MyMonad[List] {
       override def pure[A](value: A): List[A] = List(value)
 
       override def flatMap[A, B](fa: List[A])(f: A => List[B]): List[B] = fa.flatMap(f)
-
-      override def empty[A]: List[A] = List.empty[A]
     }
 
     implicit val boxMonad: MyMonad[Box] = new MyMonad[Box] {
@@ -75,8 +71,25 @@ object Chapter4 {
         case EmptyBox => EmptyBox
         case FullBox(value) => f(value)
       }
+    }
 
-      override def empty[A]: Box[A] = EmptyBox
+    implicit val idMonad: MyMonad[Id] = new MyMonad[Id] {
+      override def pure[A](value: A): Id[A] = value
+
+      override def flatMap[A, B](fa: Id[A])(f: A => Id[B]): Id[B] = f(fa)
+
+    }
+
+    implicit val tryMonad: MyMonad[Try] = new MyMonad[Try] {
+      override def pure[A](value: A): Try[A] = Success(value)
+
+      override def flatMap[A, B](fa: Try[A])(f: A => Try[B]): Try[B] = fa.flatMap(f)
+    }
+
+    implicit def eitherMonad[E]: MyMonad[Either[E, ?]] = new MyMonad[Either[E, ?]] {
+      override def pure[A](value: A): Either[E, A] = Right(value)
+
+      override def flatMap[A, B](fa: Either[E, A])(f: A => Either[E, B]): Either[E, B] = fa.flatMap(f)
     }
   }
 

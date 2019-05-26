@@ -20,4 +20,6 @@ object Types {
   sealed trait Tree[+A]
   final case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
   final case class Leaf[A](Value: A) extends Tree[A]
+
+  type Id[A] = A
 }
