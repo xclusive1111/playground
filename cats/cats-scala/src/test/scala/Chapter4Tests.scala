@@ -25,6 +25,33 @@ class Chapter4Tests extends FunSuite {
     assert(sumBox === Box(5))
   }
 
+  test("foldRight stack safe using Eval monad") {
+    import cats.Eval
+
+    def foldRight[A, B](xs: List[A])(zero: B)(combineFn: (A, B) => B): B = {
+
+      // Simplified version, stack-unsafe
+      def go(as: List[A], acc: B)(f: (A, B) => B): B = as match {
+        case head :: tail => f(head, go(tail, acc)(f))
+        case Nil          => acc
+      }
+
+      // Stack safe
+      def fold(as: List[A], acc: Eval[B])(f: (A, Eval[B]) => Eval[B]): Eval[B] = as match {
+        case head :: tail => Eval.defer(f(head, fold(tail, acc)(f)))
+        case Nil          => acc
+      }
+
+      fold(xs, Eval.now(zero)){ (a, acc) => acc.map(b => combineFn(a, b)) }.value
+    }
+
+    val sum = foldRight(List(1, 2, 3, 4))(0)(_ + _)
+    assert(sum == 10)
+    val bigList = List.fill(500000)(1)
+    val sum2 = foldRight(bigList)(0)(_ + _)
+    assert(sum2 == 500000)
+  }
+
   def parseInt(str: String): Try[Int] = Try(str.toInt)
 
   def sumSquare[F[_]: MyMonad](a: F[Int], b: F[Int]): F[Int] =
