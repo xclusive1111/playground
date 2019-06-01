@@ -32,6 +32,12 @@ object Chapter2 {
       override def empty: Int = 0
     }
 
+    implicit val stringMonoid: MyMonoid[String] = new MyMonoid[String] {
+      override def empty: String = ""
+
+      override def combine(a1: String, a2: String): String = a1 + a2
+    }
+
     implicit val catMonoid: MyMonoid[Cat] = new MyMonoid[Cat] {
       override def combine(a1: Cat, a2: Cat): Cat = Cat(a1.name + a2.name, a1.age + a2.age, a1.color + a2.color)
 
@@ -66,6 +72,12 @@ object Chapter2 {
 
       override def combine(a1: Types.Order, a2: Types.Order): Types.Order =
         Types.Order(a1.totalCost + a2.totalCost, a1.quantity + a2.quantity)
+    }
+
+    implicit def vectorMonoid[A]: MyMonoid[Vector[A]] = new MyMonoid[Vector[A]] {
+      override def empty: Vector[A] = Vector.empty[A]
+
+      override def combine(a1: Vector[A], a2: Vector[A]): Vector[A] = a1 ++ a2
     }
   }
 

@@ -1,3 +1,4 @@
+import Chapter2.MyMonoid
 import Chapter3.MyFunctor
 import Types.{Box, EmptyBox, FullBox, Id}
 
@@ -91,6 +92,36 @@ object Chapter4 {
 
       override def flatMap[A, B](fa: Either[E, A])(f: A => Either[E, B]): Either[E, B] = fa.flatMap(f)
     }
+
+    implicit def writerMonad[W: MyMonoid]: MyMonad[MyWriter[W, ?]] = new MyMonad[MyWriter[W, ?]] {
+      override def pure[A](value: A): MyWriter[W, A] = MyWriter(MyMonoid[W].empty, value)
+
+      override def flatMap[A, B](fa: MyWriter[W, A])(f: A => MyWriter[W, B]): MyWriter[W, B] = fa.bind(f)
+    }
   }
 
+  /**
+    * Define a Writer monad.
+    * A Writer is a data structure that allows to carry a log along with a computation.
+    * A Writer can be used to record messages, errors or additional data about a computation,
+    * and extract a log alongside the final result.
+    *
+    * @tparam W type of a `log`
+    * @tparam A type of a value
+    */
+  final case class MyWriter[W, A](written: W, value: A) {
+    def run: (W, A) = (written, value)
+
+    def fmap[B](fn: A => B): MyWriter[W, B] =
+      MyWriter(written, fn(value))
+
+    // Use `bind` intentionally instead of `flatMap`, just for fun :)
+    def bind[B](fn: A => MyWriter[W, B])(implicit monoid: MyMonoid[W]): MyWriter[W, B] =
+      fn(value) match {
+        case MyWriter(xs, b) => MyWriter(MyMonoid[W].combine(written, xs), b)
+      }
+
+    def reset(implicit monoid: MyMonoid[W]): MyWriter[W, A] =
+      MyWriter(MyMonoid[W].empty, value)
+  }
 }
