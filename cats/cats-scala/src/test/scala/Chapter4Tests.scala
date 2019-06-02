@@ -1,7 +1,7 @@
-import Chapter4.{MyMonad, MyWriter}
+import Chapter4.{MyMonad, MyReader, MyWriter}
 import Chapter4.MyMonadInstance._
-import Chapter4.MyMonadSyntax._
-import Types.{Box, FullBox}
+import Chapter4.MyMonadSyntax._     // for `flatMap` in order to use for comprehension
+import Types.{Box, Db, FullBox}
 import org.scalatest.FunSuite
 
 import scala.util.Try
@@ -53,7 +53,6 @@ class Chapter4Tests extends FunSuite {
   }
 
   test("Writer monad") {
-    import Chapter4.MyMonadInstance._
     import Chapter2.MyMonoidInstance._ // for monoid instances, such as Vector and String
 
     val w1 = MyWriter(Vector("1", "2", "3"), 5)
@@ -86,7 +85,6 @@ class Chapter4Tests extends FunSuite {
   }
 
   test("writer monad with factorial") {
-    import Chapter4.MyMonadInstance._
     import Chapter2.MyMonoidInstance._ // for monoid instances, such as Vector and String
 
     import scala.concurrent._
@@ -116,6 +114,7 @@ class Chapter4Tests extends FunSuite {
       Future(factorialPrint(10))
     )), 5.seconds)
 
+
     /**
       * Writers are useful for logging operations in multi-threaded environments.
       * The test below computes a factorial and log the result of each intermediate steps as it runs.
@@ -136,6 +135,33 @@ class Chapter4Tests extends FunSuite {
     results2
       .map(w => w.run._1)
       .foreach(println)
+  }
+
+  test("Reader monad") {
+    type DbReader[A] = MyReader[Db, A]
+
+    def findUsername(uid: Int): DbReader[Option[String]] =
+      MyReader(db => db.usernames.get(uid))
+
+    def checkPassword(uname: String, pwd: String): DbReader[Boolean] =
+      MyReader(db => db.passwords.exists(_ == (uname, pwd)))
+
+    def checkLogin(uid: Int, pwd: String): DbReader[Boolean] =
+      for {
+        unameOpt <- findUsername(uid)
+        isValid  <- unameOpt
+                      .map(uname => checkPassword(uname, pwd))
+                      .getOrElse(false.pure[DbReader])
+      } yield isValid
+
+    val users = Map(1 -> "foo", 2 -> "bar", 3 -> "foobar")
+    val passwords = Map("foo" -> "abcd", "bar" -> "1234", "foobar" -> "pa55w0rd")
+
+    val db = Db(users, passwords)
+    val isValid = checkLogin(1, "abcd").run(db)
+    assert(isValid)
+    val isInvalid = checkLogin(1, "1234").run(db)
+    assert(isInvalid === false)
   }
 
   def parseInt(str: String): Try[Int] = Try(str.toInt)

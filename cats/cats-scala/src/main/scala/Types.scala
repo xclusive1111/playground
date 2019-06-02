@@ -22,4 +22,6 @@ object Types {
   final case class Leaf[A](Value: A) extends Tree[A]
 
   type Id[A] = A
+
+  case class Db(usernames: Map[Int, String], passwords: Map[String, String])
 }

@@ -47,8 +47,8 @@ object Chapter4 {
       def map[B](fab: A => B)(implicit M: MyMonad[F]): F[B] = M.fmap(fa)(fab)
     }
 
-    implicit class Ops[F[_]: MyMonad, A](value: A) {
-      def pure(): F[A] = MyMonad[F].pure(value)
+    implicit class Ops[A](value: A) {
+      def pure[F[_]: MyMonad]: F[A] = MyMonad[F].pure(value)
     }
   }
 
@@ -98,6 +98,12 @@ object Chapter4 {
 
       override def flatMap[A, B](fa: MyWriter[W, A])(f: A => MyWriter[W, B]): MyWriter[W, B] = fa.bind(f)
     }
+
+    implicit def readerMonad[DEP]: MyMonad[MyReader[DEP, ?]] = new MyMonad[MyReader[DEP, ?]] {
+      override def pure[A](value: A): MyReader[DEP, A] = MyReader(_ => value)
+
+      override def flatMap[A, B](fa: MyReader[DEP, A])(f: A => MyReader[DEP, B]): MyReader[DEP, B] = fa.bind(f)
+    }
   }
 
   /**
@@ -123,5 +129,36 @@ object Chapter4 {
 
     def reset(implicit monoid: MyMonoid[W]): MyWriter[W, A] =
       MyWriter(MyMonoid[W].empty, value)
+  }
+
+
+  /**
+    * Define a Reader monad.
+    * A Reader is a data structure that wrap up a function of one argument
+    * and allows to sequence operations that depend on some input.
+    *
+    * One common use case for Reader is dependency injection. If we have a number
+    * of operations that all depend on some external configuration, we can chain
+    * them together using a Reader to produce one large operation that accept the
+    * configuration as a parameter and runs our program in the order specified.
+    *
+    * @param run A function to be wrapped.
+    * @tparam A type of the input.
+    * @tparam B type of the output.
+    */
+  final case class MyReader[A, B](run: A => B) {
+    /**
+      * The `map` method simply extends the computation in the Reader by passing
+      * the result of previous computation through a specified function.
+      */
+    def map[C](f: B => C): MyReader[A, C] =
+      MyReader(f.compose(run))
+
+    /**
+      * The `flatMap` method allows to combine Readers that depend on the same input type.
+      */
+    def bind[C](f: B => MyReader[A, C]): MyReader[A, C] =
+      MyReader(a => f(run(a)).run(a))
+
   }
 }
