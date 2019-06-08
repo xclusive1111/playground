@@ -32,10 +32,7 @@ object Chapter4 {
     * Define interface using implicit object
     */
   object MyMonad {
-    def apply[F[_]](implicit m: MyMonad[F]): MyMonad[F] = m
-    def pure[F[_], A](value: A)(implicit m: MyMonad[F]): F[A] = m.pure(value)
-    def flatMap[F[_], A, B](fa: F[A])(f: A => F[B])(implicit m: MyMonad[F]): F[B] = m.flatMap(fa)(f)
-    def map[F[_], A, B](fa: F[A])(f: A => B)(implicit m: MyMonad[F]): F[B] = m.fmap(fa)(f)
+    def apply[F[_]](implicit M: MyMonad[F]): MyMonad[F] = M
   }
 
   /**
@@ -104,6 +101,12 @@ object Chapter4 {
 
       override def flatMap[A, B](fa: MyReader[DEP, A])(f: A => MyReader[DEP, B]): MyReader[DEP, B] = fa.bind(f)
     }
+
+    implicit def stateMonad[S]: MyMonad[MyState[S, ?]] = new MyMonad[MyState[S, ?]] {
+      override def pure[A](value: A): MyState[S, A] = MyState(s => (s, value))
+
+      override def flatMap[A, B](fa: MyState[S, A])(f: A => MyState[S, B]): MyState[S, B] = fa.bind(f)
+    }
   }
 
   /**
@@ -155,10 +158,61 @@ object Chapter4 {
       MyReader(f.compose(run))
 
     /**
-      * The `flatMap` method allows to combine Readers that depend on the same input type.
+      * The `bind` method allows to combine Readers that depend on the same input type.
       */
     def bind[C](f: B => MyReader[A, C]): MyReader[A, C] =
       MyReader(a => f(run(a)).run(a))
 
+  }
+
+
+  /**
+    * Define a State monad.
+    * State monad allows to pass additional state around as part of a computation.
+    * An instance of State[S, A] represent a function of type S => (S, A) which transforms
+    * an input state to an output state while compute a result.
+    *
+    * The power of State monad comes from combining instances like Reader and Writer
+    * with each individual instance represents an atomic state transformation
+    * and their combination represents a complete sequence of changes.
+    *
+    * @param run A function takes an input state and returns a new state along with a computed result.
+    * @tparam S type of the state
+    * @tparam A type of the result
+    */
+  final case class MyState[S, A](run: S => (S, A)) {
+    def runA(s: S): A = run(s)._2
+
+    def runS(s: S): S = run(s)._1
+
+    def map[B](f: A => B): MyState[S, B] =
+      MyState { s =>
+        val (newS, rs) = run(s)
+        (newS, f(rs))
+      }
+
+    def bind[B](f: A => MyState[S, B]): MyState[S, B] =
+      MyState { s =>
+        val (newS, a) = run(s)
+        f(a).run(newS)
+      }
+
+    def inspect[B](f: A => B): MyState[S, B] =
+      MyState { s =>
+        val (state, result) = run(s)
+        (state, f(result))
+      }
+
+    def modify(f: S => S): MyState[S, A] =
+      MyState { s =>
+        val (state, result) = run(s)
+        (f(state), result)
+      }
+  }
+
+  object MyState {
+    def pure[S, A](value: A): MyState[S, A] = MyState(s => (s, value))
+    def modify[S](f: S => S): MyState[S, Unit] = MyState(s => (f(s), ()))
+    def inspect[S, T](f: S => T): MyState[S, T] = MyState(s => (s, f(s)))
   }
 }

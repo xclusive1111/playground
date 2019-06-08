@@ -1,6 +1,6 @@
-import Chapter4.{MyMonad, MyReader, MyWriter}
 import Chapter4.MyMonadInstance._
-import Chapter4.MyMonadSyntax._     // for `flatMap` in order to use for comprehension
+import Chapter4.MyMonadSyntax._
+import Chapter4.{MyMonad, MyReader, MyState, MyWriter}
 import Types.{Box, Db, FullBox}
 import org.scalatest.FunSuite
 
@@ -85,7 +85,7 @@ class Chapter4Tests extends FunSuite {
   }
 
   test("writer monad with factorial") {
-    import Chapter2.MyMonoidInstance._ // for monoid instances, such as Vector and String
+    import Chapter2.MyMonoidInstance._
 
     import scala.concurrent._
     import scala.concurrent.duration._
@@ -162,6 +162,75 @@ class Chapter4Tests extends FunSuite {
     assert(isValid)
     val isInvalid = checkLogin(1, "1234").run(db)
     assert(isInvalid === false)
+  }
+
+  test("State monad") {
+    val add1 = MyState[Int, String] { num =>
+      val rs = num + 1
+      (rs, s"Result of add1: $rs")
+    }
+
+    val time2 = MyState[Int, String] { num =>
+      val rs = num * 2
+      (rs, s"Result of time2: $rs")
+    }
+
+    val add1ThenTime2 = for {
+      a <- add1
+      b <- time2
+    } yield (a, b)
+
+    val (state, rs) = add1ThenTime2.run(10)
+    assert(state === 22)
+    assert(rs === ("Result of add1: 11", "Result of time2: 22"))
+    assert(MyState.modify[Int](_ + 1).run(10) === (11, ()))
+    assert(MyState.inspect[Int, String](_ + "!").run(10) === (10, "10!"))
+
+    val fun = for {
+      a <- add1
+      b <- time2
+      _ <- MyState.modify[Int](_ + 1)
+    } yield (a, b)
+    assert(fun.runS(10) === 23)
+  }
+
+  test("Post-order calculator using state monad") {
+    // A calculator represents a transformation stack and an intermediate result
+    type Calculator[A] = MyState[List[Int], A]
+
+    def evalAll(symbols: List[String]): Calculator[Int] =
+      symbols
+        .map(eval)
+        .reduce(combineCalc)
+
+    def eval(symbol: String): Calculator[Int] = symbol match {
+      case "+" => operator(_ + _)
+      case "-" => operator(_ - _)
+      case "*" => operator(_ * _)
+      case "/" => operator(_ / _)
+      case s@_ => operand(s.toInt)
+    }
+
+    def operand(n: Int): Calculator[Int] = MyState { nums => (nums :+ n, n) }
+
+    def operator(f: (Int, Int) => Int): Calculator[Int] = MyState {
+      case a :: b :: tail =>
+        val result = f(a, b)
+        (result :: tail, result)
+      case _ => sys.error("Failed")
+    }
+
+    def combineCalc(acc: Calculator[Int], a: Calculator[Int]): Calculator[Int] =
+      for {
+        _  <- acc
+        rs <- a
+      } yield rs
+
+    def evalInput(str: String): Calculator[Int] =
+      evalAll(str.split("\\s+").toList)
+
+    val exp = "1 2 + 3 * 6 - 3 /" // equivalent to ((1 + 2) * 3) - 6) / 3 = 1
+    assert(evalInput(exp).run(Nil) === (List(1), 1))
   }
 
   def parseInt(str: String): Try[Int] = Try(str.toInt)
