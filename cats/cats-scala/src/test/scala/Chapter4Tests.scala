@@ -1,7 +1,7 @@
 import Chapter4.MyMonadInstance._
 import Chapter4.MyMonadSyntax._
 import Chapter4.{MyMonad, MyReader, MyState, MyWriter}
-import Types.{Box, Db, FullBox}
+import Types._
 import org.scalatest.FunSuite
 
 import scala.util.Try
@@ -231,6 +231,43 @@ class Chapter4Tests extends FunSuite {
 
     val exp = "1 2 + 3 * 6 - 3 /" // equivalent to ((1 + 2) * 3) - 6) / 3 = 1
     assert(evalInput(exp).run(Nil) === (List(1), 1))
+  }
+
+  test("Tree monad") {
+    val tree: Tree[Int] = Branch(
+      Leaf(1),
+      Branch(
+        Leaf(2),
+        Leaf(10)
+      )
+    )
+    val f1 = MyMonad[Tree].flatMap(tree)(n => Leaf(n + 1))
+    assert(f1 === Branch(Leaf(2), Branch(Leaf(3), Leaf(11))))
+
+    val rs = for {
+      t  <- Branch(Leaf(1), Branch(Leaf(1), Leaf(2))).asInstanceOf[Tree[Int]]
+      t1 <- Leaf(1).asInstanceOf[Tree[Int]]
+      t2 <- Branch(Leaf(1), Leaf(2)).asInstanceOf[Tree[Int]]
+    } yield t + t1 + t2
+    println(rs)
+
+    val expected = Branch(
+      Branch(
+        Leaf(3),
+        Leaf(4)
+      ),
+      Branch(
+        Branch(
+          Leaf(3),
+          Leaf(4)
+        ),
+        Branch(
+          Leaf(4),
+          Leaf(5)
+        )
+      )
+    )
+    assert(rs === expected)
   }
 
   def parseInt(str: String): Try[Int] = Try(str.toInt)

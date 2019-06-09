@@ -1,6 +1,6 @@
 import Chapter2.MyMonoid
 import Chapter3.MyFunctor
-import Types.{Box, EmptyBox, FullBox, Id}
+import Types._
 
 import scala.util.{Success, Try}
 
@@ -107,6 +107,16 @@ object Chapter4 {
 
       override def flatMap[A, B](fa: MyState[S, A])(f: A => MyState[S, B]): MyState[S, B] = fa.bind(f)
     }
+
+    implicit def treeMonad: MyMonad[Tree] = new MyMonad[Tree] {
+      override def pure[A](value: A): Tree[A] = Leaf(value)
+
+      override def flatMap[A, B](fa: Tree[A])(f: A => Tree[B]): Tree[B] = fa match {
+        case Branch(left, right) => Branch(flatMap(left)(f), flatMap(right)(f))
+        case Leaf(value)         => f(value)
+      }
+    }
+
   }
 
   /**
