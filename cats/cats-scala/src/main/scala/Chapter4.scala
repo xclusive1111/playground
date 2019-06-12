@@ -1,5 +1,6 @@
 import Chapter2.MyMonoid
 import Chapter3.MyFunctor
+import Chapter5.MyOptionT
 import Types._
 
 import scala.util.{Success, Try}
@@ -115,6 +116,12 @@ object Chapter4 {
         case Branch(left, right) => Branch(flatMap(left)(f), flatMap(right)(f))
         case Leaf(value)         => f(value)
       }
+    }
+
+    implicit def optionTMonad[F[_]](implicit M: MyMonad[F]): MyMonad[MyOptionT[F, ?]] = new MyMonad[MyOptionT[F, ?]] {
+      override def pure[A](value: A): MyOptionT[F, A] = MyOptionT(M.pure[Option[A]](Some(value)))
+
+      override def flatMap[A, B](fa: MyOptionT[F, A])(f: A => MyOptionT[F, B]): MyOptionT[F, B] = fa.flatMap(f)
     }
 
   }
