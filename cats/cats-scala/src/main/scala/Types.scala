@@ -24,4 +24,8 @@ object Types {
   type Id[A] = A
 
   case class Db(usernames: Map[Int, String], passwords: Map[String, String])
+
+  sealed abstract class MyValidated[+E, +A]
+  final case class MyValid[+E, +A](value: A) extends MyValidated[E, A]
+  final case class MyInvalid[+E, +A](error: E) extends MyValidated[E, A]
 }

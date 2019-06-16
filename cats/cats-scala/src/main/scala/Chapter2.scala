@@ -50,6 +50,12 @@ object Chapter2 {
       override def combine(a1: Boolean, a2: Boolean): Boolean = a1 && a2
     }
 
+    implicit def listMonoid[A]: MyMonoid[List[A]] = new MyMonoid[List[A]] {
+      override def empty: List[A] = List.empty[A]
+
+      override def combine(a1: List[A], a2: List[A]): List[A] = a1 ::: a2
+    }
+
     implicit def setMonoid[A]: MyMonoid[Set[A]] = new MyMonoid[Set[A]] {
       override def empty: Set[A] = Set.empty[A]
 
