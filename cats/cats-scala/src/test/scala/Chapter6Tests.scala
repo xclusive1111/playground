@@ -1,5 +1,5 @@
 import Chapter4.MyMonad
-import Chapter6.MySemigroupal
+import Chapter6.{Kleisli, MySemigroupal}
 import org.scalatest.FunSuite
 import Chapter6.SemigroupalInstances._
 import Types.{MyInvalid, MyValid, MyValidated}
@@ -137,6 +137,22 @@ class Chapter6Tests extends FunSuite {
     val form2 = Map[String, String]("name_" -> "sondv", "age" -> "0", "languages" -> "en,vi" )
     val invalid = getUser(form2)
     assert(invalid === MyInvalid(List("name field is not specified", "age must be a positive integer")))
+  }
+
+  test("Kleisli") {
+    import Chapter4.MyMonadInstance._
+
+    val parse: Kleisli[Option, String, Int] =
+      Kleisli(s => Try(s.toInt).toOption)
+
+    val reciprocal: Kleisli[Option, Int, Double] =
+      Kleisli(n => if (n != 0) Some(1.0 / n) else None)
+
+    val f1 = parse andThen reciprocal
+    val f2 = reciprocal compose parse
+
+    assert(f1.run("10") === Some(0.1))
+    assert(f1.run("10") === f2.run("10"))
   }
 
 }

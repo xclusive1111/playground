@@ -1,5 +1,6 @@
 import Chapter2.MyMonoid
 import Chapter3.MyFunctor
+import Chapter4.MyMonad
 import Types.{MyInvalid, MyValid, MyValidated}
 
 /**
@@ -158,6 +159,34 @@ object Chapter6 {
     */
   trait MyApplicative[F[_]] extends MyApply[F] {
     def pure[A](a: A): F[A]
+  }
+
+  /**
+    * Kleisli[F[_], A, B] is just a wrapper around a function A => F[B].
+    * Given a function A => B and a function B => C, we can create a new
+    * function A => C.
+    *
+    * Kleisli allows to compose functions which return monadic contexts F[_], i.e:
+    * Given a function A => F[B] and a function B => F[C], we can create a
+    * new function A => F[C].
+    */
+  final case class Kleisli[F[_], A, B](run: A => F[B]) {
+
+    /**
+      * First run a function: Z => F[A]
+      * then run a function: A => F[B]
+      * and return a function: Z => F[B]
+      */
+    def compose[Z](k: Kleisli[F, Z, A])(implicit M: MyMonad[F]): Kleisli[F, Z, B] =
+      Kleisli(z => M.flatMap(k.run(z))(run))
+
+    /**
+      * First run a function: A => F[B]
+      * then run a function: B => F[Z]
+      * and return a function: A => F[Z]
+      */
+    def andThen[Z](k: Kleisli[F, B, Z])(implicit M: MyMonad[F]): Kleisli[F, A, Z] =
+      Kleisli(a => M.flatMap(run(a)) { b => k.run(b) })
   }
 
 }
