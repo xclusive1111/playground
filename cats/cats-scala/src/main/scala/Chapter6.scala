@@ -1,4 +1,5 @@
 import Chapter2.MyMonoid
+import Chapter3.MyFunctor
 import Types.{MyInvalid, MyValid, MyValidated}
 
 /**
@@ -135,6 +136,28 @@ object Chapter6 {
         case Right(v) => MyValid(v)
       }
     }
+  }
+
+  /**
+    * Define the Apply typeclass
+    * @tparam F Type of the context
+    */
+  trait MyApply[F[_]] extends MySemigroupal[F] with MyFunctor[F] {
+    /**
+      * Applies a parameter `fa` to a function `ff` within a context F[_] */
+    def ap[A, B](ff: F[A => B])(fa: F[A]): F[B]
+
+    override
+    def product[A, B](fa: F[A], fb: F[B]): F[(A, B)] =
+      ap(fmap(fa)(a => (b: B) => (a, b)))(fb)
+  }
+
+  /**
+    * Define Applicative typeclass
+    * @tparam F Type of the context
+    */
+  trait MyApplicative[F[_]] extends MyApply[F] {
+    def pure[A](a: A): F[A]
   }
 
 }
