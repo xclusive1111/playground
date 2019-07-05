@@ -1,0 +1,45 @@
+
+.flex {
+  display: flex;
+}
+
+.flex.column {
+  flex-direction: column;
+}
+
+.flex.row {
+  flex-direction: row;
+}
+
+.flex.center.aligned {
+  justify-content: center;
+  align-items: center;
+}
+
+.flex.space-evenly {
+  justify-content: space-evenly;
+}
+
+.board-row:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.mar20 {
+  margin: 20px 0;
+}
+
+.square {
+  background: #fff;
+  border: 1px solid #999;
+  font-size: 24px;
+  font-weight: bold;
+  margin-right: -1px;
+  margin-top: -3px;
+  padding: 0;
+  text-align: center;
+  width: 34px;
+  height: 34px;
+}
+
