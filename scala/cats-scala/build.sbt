@@ -1,4 +1,4 @@
-scalaVersion := "2.12.3"
+calaVersion := "2.12.3"
 libraryDependencies +=
   "org.typelevel" %% "cats-core" % "1.0.0"
 
