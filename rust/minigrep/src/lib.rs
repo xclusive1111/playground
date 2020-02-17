@@ -10,13 +10,18 @@ pub struct Config {
 impl Config {
     // The 'static is a special lifetime that can life for the
     // entire duration of the program.
-    pub fn new(args: &[String]) -> Result<Self, &'static str> {
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        }
+    pub fn new(mut args: std::env::Args) -> Result<Self, &'static str> {
+        args.next();
 
-        let query = args[1].clone();
-        let filename = args[2].clone();
+        let query = match args.next() {
+            Some(v) => v,
+            None => return Err("Missing query argument"),
+        };
+
+        let filename = match args.next() {
+            Some(v) => v,
+            None => return Err("Missing filename argument"),
+        };
 
         // If the env is not set, do a case sensitive search.
         let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
