@@ -52,7 +52,7 @@ impl Iterator for Counter {
 pub fn generate_workout(intensity: u32, random_number: u32) {
     let mut expensive_result = Cacher::new(|num: u32| {
         println!("Calculating...");
-        thread::sleep(Duration::from_secs(2));
+        thread::sleep(Duration::from_millis(100));
         num
     });
 

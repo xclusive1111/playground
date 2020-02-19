@@ -1,5 +1,9 @@
+mod smart_pointers;
+
+use smart_pointers::b;
+use smart_pointers::c;
+
 fn main() {
-    let intensity = 10;
-    let random_number = 7;
-    fp::generate_workout(intensity, random_number);
+    b::run();
+    c::run();
 }
