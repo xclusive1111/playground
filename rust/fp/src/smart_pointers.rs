@@ -33,7 +33,7 @@ pub mod b {
         let intensity = 10;
         let random_number = 7;
         fp::generate_workout(intensity, random_number);
-        let list = List::Cons(1,
+        let _list = List::Cons(1,
                         Box::new(List::Cons(2,
                                       Box::new(List::Cons(3,
                                                     Box::new(List::Nil))))));
@@ -70,7 +70,7 @@ pub mod c {
 
     pub fn run() {
         let a = Rc::new(Cons(5, Rc::new(Cons(6, Rc::new(Nil)))));
-        let b = Cons(4, Rc::clone(&a));
-        let c = Cons(3, Rc::clone(&a));
+        let _b = Cons(4, Rc::clone(&a));
+        let _c = Cons(3, Rc::clone(&a));
     }
 }
