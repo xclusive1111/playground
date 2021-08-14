@@ -6,31 +6,21 @@ class ListNode {
         this.val = val;
         this.next = next;
     }
-
-    toString(): string {
-        const next = this.next ? this.next.val : 'null';
-        return `Val: ${this.val}, Next: ${next}`;
-    }
 }
 
-const solution = (n: ListNode): ListNode => {
-    const re = (head: ListNode | null): ListNode | null => {
-        // reache the end
-        if (head == null || head.next == null) return head;
+const solution = (l: ListNode): ListNode => {
+    let stack = [];
 
-        /* reverse the rest list and put
-        the first element at the end */
-        let tail: ListNode | null = re(head.next);
-        head.next.next = head;
-
-        /* tricky step -- see the diagram */
-        head.next = null;
-
-        /* fix the head pointer */
-        return tail;
+    let tmp: ListNode | null = l;
+    while (tmp != null) {
+        stack.push(tmp);
+        tmp = tmp.next;
     }
 
-    return re(n)!!;
+    return stack.reduce((acc, a) => {
+        a.next = acc;
+        return a;
+    }, null!!);
 }
 
 let l: ListNode | null = new ListNode(1, new ListNode(2, new ListNode(3, new ListNode(4, null))));
@@ -44,7 +34,5 @@ const printNode = (n: ListNode) => {
     }
 }
 
-printNode(l);
-
-let a = solution(l!!);
+let a = solution(l);
 printNode(a);
