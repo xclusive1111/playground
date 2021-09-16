@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script type="text/javascript" src="https://cdn.rawgit.com/ricmoo/aes-js/e27b99df/index.js"></script>
+  <script type="text/javascript" src="app.js"></script>
+  <script>
+
+      // Decrypt
+      const encryptedText = "aqSWxyoUZFJDcO0mbdeZj/Fjk6d8RuNZR6/OJq4B0LqdMKdVnR34IzeQUsFuiporSZG5Ur5QXvFm2xY+nV1fFK4PoNQX+pZfIMtu6h7DJxNYpFFL89xOOBlghddQctUenSZBGlwNBlIvErUqKK+vb+/ougDFNzHxTKXlUiTM60aoBF6t20usB91vcs9fhzeeO4RWcQKBBU/Om3A7fBVC7j1+owptU2TW/dQZ2GGT8MIxVr2KF4kyRlxDxxIsu7mStPkfVD1h28Z+icpaSlw99o/+xfl5XusIt3TnMczJU7qGaxm9mw6viHSEbNG2VmUNQlG/rzb5gLO6ACu9rbqD8GCF73bMFHeO5kZCedJgfT5duG4tuEXLMf/10hb8lEHMXfVf42IdSyjNTyOvA1/JlBjwMsW5Zed8LJGf0Ekc9IdVyQsbxKHSs21ZlnT0TaFgh1MdEuo0yTbQ6fjbDIzOlr1WR1eKSDCNdNX84D1UXABUMNkT/XHsT7Na+nOeUbHGSrPip+TeDE3mKXEEGHTOTqiLl/m5QdWUPdfRIXcIqTc=";
+      const key = "5534a9ae80bc15296c71e0cef0140893";
+      const decryptedText = Decrypt(encryptedText, key)
+      console.log(decryptedText);
+
+      setTimeout(() => {
+          document.getElementById("decryptedText").innerText = decryptedText;
+      }, 1000)
+
+      // Encrypt
+      const plainText = "mobile=0377260701&bankcode=908401&bankname=&token=CLuBY0O//NAJpxMxfYvAXUj+1nbLE2zX/mj2YWxAfc6qNtwjhNYh3DgQ1xnJAz9iKtPxWB0ucr6inkUOk54CWiXpDuENfNOAXKKgPbjB/72O8djL7315tPPwL5sfUutsaEEA1n0VsjYOyVVvg9Yfy7xB99bvW91CwOcsey13bW4J9q1V+47sxYfVDRLvhTV5RI8iXWNeqqyLEMU/73yJ6Y/eUJmmHmqPXLhznUXNUKVh3bo1BlPlHZGDY8QX4S5DM0BELfboUk4dZ+EF6mERM/P8RzY2ovWk7XYuti6IiwXpN0SVNAG9hsADuSVzPR2xRAQkRX65tQBeH0odJQdWPw==";
+      const encrypted = Encrypt(plainText, key);
+      console.log(encrypted);
+
+      setTimeout(() => {
+          document.getElementById("encrypted").innerText = encrypted;
+      }, 1000)
+
+  </script>
+</head>
+<body>
+<h1>AES Javascript</h1>
+<div>
+  <div>Decrypted text:</div>
+  <div id="decryptedText" style="width: 700px; word-wrap: break-word;"></div>
+  <br>
+  <hr>
+
+  <div>Encrypted text:</div>
+  <div id="encrypted" style="width: 700px; word-wrap: break-word;"></div>
+</div>
+</body>
+</html>
